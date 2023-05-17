@@ -9,3 +9,4 @@ const container = document.querySelector('.trip-events');
 const tripPresenter = new Presenter({container: container});
 
 tripPresenter.init();
+
