@@ -6,6 +6,6 @@ const filters = document.querySelector('.trip-controls__filters');
 render(new FiltersView(), filters);
 
 const container = document.querySelector('.trip-events');
-const tripPresenter = new Presenter({container: container});
+const presenter = new Presenter();
 
-tripPresenter.init();
+presenter.init(container);
