@@ -12,7 +12,7 @@ export default class Presenter {
   #tripPointsModel = null;
   #tripListComponent = null;
 
-  constructor({container, tripPointsModel}) {
+  constructor({container, tripPointsModel}) { //NEW PULL
     this.#tripPointsModel = tripPointsModel;
     this.#container = container;
   }
