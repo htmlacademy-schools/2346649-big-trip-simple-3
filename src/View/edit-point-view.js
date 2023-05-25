@@ -170,26 +170,26 @@ const createEditFormTemplate = (eventPoint) => {
 export default class EditPointView extends AbstractView {
 
   #tripPoint = null;
-  #handleFormSubmit = null;
+  // #handleFormSubmit = null;
 
-  constructor({tripPoint, onFormSubmit}) {
+  constructor({tripPoint}) {
     super();
     this.#tripPoint = tripPoint;
 
-    this.#handleFormSubmit = onFormSubmit;
+    // this.#handleFormSubmit = onFormSubmit;
 
-    this.element.querySelector('.event--edit')
-      .addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#formSubmitHandler);
+    // this.element.querySelector('.event--edit')
+    //   .addEventListener('submit', this.#formSubmitHandler);
+    // this.element.querySelector('.event__rollup-btn')
+    //   .addEventListener('click', this.#formSubmitHandler);
   }
 
   get template() {
     return createEditFormTemplate(this.#tripPoint);
   }
 
-  #formSubmitHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleFormSubmit();
-  };
+  // #formSubmitHandler = (evt) => {
+  //   evt.preventDefault();
+  //   this.#handleFormSubmit();
+  // };
 }
