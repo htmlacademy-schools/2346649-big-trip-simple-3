@@ -51,3 +51,4 @@ export default class SortView extends AbstractView {
     return createSortTemplate(this.#sorts);
   }
 }
+//
