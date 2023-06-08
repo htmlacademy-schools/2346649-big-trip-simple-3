@@ -10,16 +10,16 @@ const Mode = {
 };
 
 export default class PointPresenter {
-  #handleModeChange = null;
-  #handleDataChange = null;
+  #handleModeChange;
+  #handleDataChange;
 
-  #tripPointList = null;
-  #editFormComponent = null;
-  #tripPointComponent = null;
+  #tripPointList;
+  #editFormComponent;
+  #tripPointComponent;
 
-  #tripPoint = null;
-  #destinations = null;
-  #offers = null;
+  #tripPoint;
+  #destinations;
+  #offers;
   #mode = Mode.DEFAULT;
 
   constructor({tripPointList, onModeChange, onDataChange}) {
@@ -48,7 +48,7 @@ export default class PointPresenter {
       onRollUpButton: this.#handleRollupButtonClick,
       onDeleteClick: this.#handleDeleteClick
     });
-    if (prevTripPointComponent === null || prevEditFormComponent === null) {
+    if (prevTripPointComponent === undefined || prevEditFormComponent === undefined) {
       render(this.#tripPointComponent, this.#tripPointList);
       return;
     }
@@ -120,7 +120,7 @@ export default class PointPresenter {
     document.body.addEventListener('keydown', this.#ecsKeyDownHandler);
   };
 
-  setAborting() {
+  setAborting = () => {
     if (this.#mode === Mode.DEFAULT) {
       this.#tripPointComponent.shake();
       return;
@@ -135,7 +135,7 @@ export default class PointPresenter {
     };
 
     this.#editFormComponent.shake(resetFormState);
-  }
+  };
 
   #handleFormSubmit = (update) => {
     const isMinorUpdate = !datesAreEqual(this.#tripPoint.dateFrom, update.dateFrom) || this.#tripPoint.basePrice !== update.basePrice;

@@ -3,10 +3,10 @@ import EditFormView from '../View/edit-point-view';
 import {USER_ACTION, UPDATE_TYPE} from '../utils/consts';
 
 export default class NewTripPointPresenter {
-  #handleDataChange ;
-  #handleDestroy ;
-  #tripPointListContainer ;
-  #tripPointEditComponent ;
+  #handleDataChange;
+  #handleDestroy;
+  #tripPointListContainer;
+  #tripPointEditComponent;
 
   constructor({tripPointListContainer, onDataChange, onDestroy}) {
     this.#tripPointListContainer = tripPointListContainer;

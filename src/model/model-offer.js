@@ -1,7 +1,7 @@
 import Observable from '../framework/observable';
 
 export default class ModelOffer extends Observable{
-  #tripPointApiServer = null;
+  #tripPointApiServer;
   #offers = [];
 
   constructor (tripPointApiServer) {
