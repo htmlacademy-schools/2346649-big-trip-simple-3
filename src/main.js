@@ -1,18 +1,61 @@
-import Presenter from './presenter/presenter';
-import FiltersView from './View/filter-view';
-import {render} from './framework/render';
-import TripPointModel from './model/model';
-import {generateFilter} from './mock/filter';
-// import PointPresenter from './presenter/point-presenter';
+import BoardPresenter from './presenter/main-presenter';
+import FilterPresenter from './presenter/filters-presenter';
+import TripPointModel from './model/model-trip-point';
+import ModelDestinations from './model/model-destination';
+import ModelOffers from './model/model-offer';
+import ModelFilters from './model/model-filter';
 
-const tripControlsFilters = document.querySelector('.trip-controls__filters');
-const container = document.querySelector('.trip-events');
+import {render} from './framework/render.js';
+import NewTripPointButtonView from './View/point-button-view';
 
-const tripPointsModel = new TripPointModel();
-const presenter = new Presenter({container, tripPointsModel});
+import ApiServer from './api-server/server';
 
-const filters = generateFilter(tripPointsModel.tripPoints);
+const AUTHORIZATION = 'Basic kekw';
+const END_POINT = 'https://18.ecmascript.pages.academy/big-trip';
 
-render(new FiltersView({filters}), tripControlsFilters);
+const boardContainer = document.querySelector('.trip-events');
+const siteFilterElement = document.querySelector('.trip-controls__filters');
+const siteHeaderElement = document.querySelector('.trip-main');
 
-presenter.init();
+const tripPointApiService = new ApiServer(END_POINT, AUTHORIZATION);
+
+const tripPointsModel = new TripPointModel(tripPointApiService);
+const destinationsModel = new ModelDestinations(tripPointApiService);
+const offersModel = new ModelOffers(tripPointApiService);
+const filterModel = new ModelFilters();
+
+const newTripPointButtonComponent = new NewTripPointButtonView({
+  onClick: handleNewTripPointButtonClick
+});
+
+const boardPresenter = new BoardPresenter({
+  boardContainer,
+  tripPointsModel,
+  destinationsModel,
+  offersModel,
+  filterModel,
+  onNewTripPointDestroy
+});
+
+const filterPresenter = new FilterPresenter(
+  siteFilterElement,
+  filterModel,
+  tripPointsModel
+);
+
+
+function handleNewTripPointButtonClick() {
+  boardPresenter.createTripPoint();
+  newTripPointButtonComponent.element.disabled = true;
+}
+
+function onNewTripPointDestroy() {
+  newTripPointButtonComponent.element.disabled = false;
+}
+
+filterPresenter.init();
+boardPresenter.init();
+tripPointsModel.init()
+  .finally(() => {
+    render(newTripPointButtonComponent, siteHeaderElement);
+  });

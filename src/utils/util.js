@@ -1,59 +1,27 @@
 import dayjs from 'dayjs';
+import {FILTER_TYPE} from './consts';
 
 const EVENT_DATE_FORMAT = 'MMM D';
 const TIME_FORMAT = 'H:mm';
 const FORM_DATE_FORMAT = 'DD/MM/YY';
+const BASIC_DATE_FORMAT = 'DD/MM/YY HH:mm';
 
 export const convertToEventDateTime = (date) => date.substring(0, date.indexOf('T'));
 export const convertToEventDate = (date) => dayjs(date).format(EVENT_DATE_FORMAT);
 export const convertToDateTime = (date) => date.substring(0, date.indexOf(':'));
 export const convertToTime = (date) => dayjs(date).format(TIME_FORMAT);
 export const convertToUpperCase = (type) => type.charAt(0).toUpperCase() + type.slice(1);
-export const makeLowercased = (str) => str.toLowerCase();
+export const makeLowerCased = (str) => str.toLowerCase();
 export const convertToFormDate = (date) => dayjs(date).format(FORM_DATE_FORMAT);
+export const convertToBasicTime = (date) => dayjs(date).format(BASIC_DATE_FORMAT);
+export const datesAreEqual = (dateA, dateB) => (!dateA && !dateB) || dayjs(dateA).isSame(dateB, 'D');
+export const getItemFromItemsById = (items, id) => (items.find((item) => item.id === id));
 
-export const getRandomDate = (maxDate = Date.now()) => {
-  const timestamp = Math.floor(Math.random() * maxDate);
-  return new Date(timestamp).toISOString();
+const dateInFuture = (dateFrom, dateTo) => dateFrom && dateTo && (dayjs().isBefore(dateFrom, 'D') || dayjs().isBefore(dateTo, 'D'));
+const dateInPast = (dateTo) => dateTo && dayjs().isAfter(dateTo, 'D');
+
+export const filter = {
+  [FILTER_TYPE.FUTURE]: (tripPoints) => tripPoints.filter((tripPoint) => dateInFuture(tripPoint.dateFrom, tripPoint.dateTo)),
+  [FILTER_TYPE.EVERYTHING]: (tripPoints) => tripPoints,
+  [FILTER_TYPE.PAST]: (tripPoints) => tripPoints.filter((tripPoint) => dateInPast(tripPoint.dateTo)),
 };
-
-export const getRandomInt = (a = 0, b = 10) => {
-  const lower = Math.ceil(Math.min(a, b));
-  const upper = Math.floor(Math.max(a, b));
-
-  return Math.floor(lower + Math.random() * (upper - lower + 1));
-};
-
-export const getRandomImageUrl = () =>
-  `http://picsum.photos/248/152?r=${getRandomInt(0, 1000)}`;
-
-export const DESCRIPTIONS = [
-  'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'Cras aliquet varius magna, non porta ligula feugiat eget.',
-  'Fusce tristique felis at fermentum pharetra.', 'Aliquam id orci ut lectus varius viverra.', 'Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.',
-  'Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.', 'Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui.',
-  'Sed sed nisi sed augue convallis suscipit in sed felis.', 'Aliquam erat volutpat.', 'Nunc fermentum tortor ac porta dapibus.', 'In rutrum ac purus sit amet tempus.'
-];
-
-export const generatePicture = () => ({
-  src: getRandomImageUrl(),
-  description: DESCRIPTIONS[getRandomInt(0, DESCRIPTIONS.length - 1)]
-});
-
-export const isTripDateBeforeToday = (date) => dayjs(date).isBefore(dayjs(), 'D') || dayjs(date).isSame(dayjs(), 'D');
-
-const compareDates = (a, b) => dayjs(a).toDate() - dayjs(b).toDate();
-
-const compareTime = (a, b) => {
-  const aDate = dayjs(a);
-  const bDate = dayjs(b);
-
-  if (aDate.hour() > bDate.hour()) {
-    return bDate.hour() - aDate.hour();
-  }
-
-  return aDate.minute() - bDate.minute();
-};
-
-export const sortByDay = (a, b) => compareDates(a.date_from, b.date_from);
-export const sortByTime = (a, b) => compareTime(a.date_from, b.date_from);
-export const sortByPrice = (a, b) => b.base_price - a.base_price;
