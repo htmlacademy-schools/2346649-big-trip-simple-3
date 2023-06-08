@@ -160,11 +160,11 @@ const createEditFormTemplate = (tripPoint, destinations, offers, isEditForm) => 
 };
 
 export default class EditFormView extends AbstractStatefulView {
-  #destinations = null;
-  #offers = null;
-  #isEditForm = null;
-  #fromDatepicker = null;
-  #toDatepicker = null;
+  #destinations;
+  #offers;
+  #isEditForm;
+  #fromDatepicker;
+  #toDatepicker;
 
   constructor({tripPoint = {
     basePrice: 500,
@@ -194,12 +194,12 @@ export default class EditFormView extends AbstractStatefulView {
 
     if (this.#fromDatepicker) {
       this.#fromDatepicker.destroy();
-      this.#fromDatepicker = null;
+      this.#fromDatepicker = undefined;
     }
 
     if (this.#toDatepicker) {
       this.#toDatepicker.destroy();
-      this.#toDatepicker = null;
+      this.#toDatepicker = undefined;
     }
   }
 
@@ -251,7 +251,7 @@ export default class EditFormView extends AbstractStatefulView {
     }
   };
 
-  #setFromDatePicker() {
+  #setFromDatePicker = () => {
     this.#fromDatepicker = flatpickr(
       this.element.querySelector(`#event-start-time-${this._state.id}`),
       {
@@ -261,9 +261,9 @@ export default class EditFormView extends AbstractStatefulView {
         onChange: this.#fromDateChangeHandler,
       },
     );
-  }
+  };
 
-  #setToDatePicker() {
+  #setToDatePicker = () => {
     this.#toDatepicker = flatpickr(
       this.element.querySelector(`#event-end-time-${this._state.id}`),
       {
@@ -274,7 +274,7 @@ export default class EditFormView extends AbstractStatefulView {
         onChange: this.#toDateChangeHandler,
       },
     );
-  }
+  };
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
