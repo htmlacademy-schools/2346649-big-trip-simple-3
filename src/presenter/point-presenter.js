@@ -94,4 +94,5 @@ export default class PointPresenter {
       this.#replaceFormToPoint();
     }
   }
+  //
 }
