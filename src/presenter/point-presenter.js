@@ -1,6 +1,8 @@
 import {remove, render, replace} from '../framework/render';
 import EventItemView from '../View/event-item-view';
-import NewItemFormView from '../View/create-form-view';
+import EditFormView from '../View/edit-point-view';
+import {UPDATE_TYPE, USER_ACTION} from '../utils/consts';
+import {datesAreEqual} from '../utils/util';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -8,90 +10,153 @@ const Mode = {
 };
 
 export default class PointPresenter {
-  #container = null;
-  #tripPoint = null;
-  #tripPointFormComponent = null;
-  #tripPointComponent = null;
   #handleModeChange = null;
+  #handleDataChange = null;
+
+  #tripPointList = null;
+  #editFormComponent = null;
+  #tripPointComponent = null;
+
+  #tripPoint = null;
+  #destinations = null;
+  #offers = null;
   #mode = Mode.DEFAULT;
 
-  constructor(container, tripPoint, {handleModeChange}) {
+  constructor({tripPointList, onModeChange, onDataChange}) {
+    this.#tripPointList = tripPointList;
+    this.#handleModeChange = onModeChange;
+    this.#handleDataChange = onDataChange;
+  }
+
+  init(tripPoint, destinations, offers) {
     this.#tripPoint = tripPoint;
-    this.#container = container;
-    this.#handleModeChange = handleModeChange;
-  }
-
-  #closeEditFormOnEcsKey(event) {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      this.#replaceFormToPoint();
-    }
-  }
-
-  #replacePointToForm() {
-    replace(this.#tripPointFormComponent, this.#tripPointComponent);
-    document.addEventListener('keydown', this.#closeEditFormOnEcsKey);
-    this.#handleModeChange();
-    this.#mode = Mode.EDITING;
-  }
-
-  #replaceFormToPoint() {
-    replace(this.#tripPointComponent, this.#tripPointFormComponent);
-    document.removeEventListener('keydown', this.#closeEditFormOnEcsKey);
-    this.#mode = Mode.DEFAULT;
-  }
-
-
-  init() {
+    this.#destinations = destinations;
+    this.#offers = offers;
     const prevTripPointComponent = this.#tripPointComponent;
-    const prevTripPointFormComponent = this.#tripPointFormComponent;
-
-    this.#tripPointFormComponent = new NewItemFormView({
-      tripPoint: this.#tripPoint
-    });
-
+    const prevEditFormComponent = this.#editFormComponent;
     this.#tripPointComponent = new EventItemView({
-      tripPoint: this.#tripPoint
+      tripPoint: this.#tripPoint,
+      destinations: this.#destinations,
+      offers: this.#offers,
+      onEditClick: this.#handleEditClick,
     });
-
-    this.#tripPointComponent.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      this.#replacePointToForm();
+    this.#editFormComponent = new EditFormView({
+      tripPoint: this.#tripPoint,
+      destinations: this.#destinations,
+      offers: this.#offers,
+      onFormSubmit: this.#handleFormSubmit,
+      onRollUpButton: this.#handleRollupButtonClick,
+      onDeleteClick: this.#handleDeleteClick
     });
-
-    this.#tripPointFormComponent.querySelector('.event__save-btn').addEventListener('click', (evt) => {
-      evt.preventDefault();
-      this.#replaceFormToPoint();
-    });
-
-    this.#tripPointFormComponent.querySelector('.event__reset-btn').addEventListener('click', () => {
-      this.#replaceFormToPoint();
-    });
-
-    if (prevTripPointComponent === null || prevTripPointFormComponent === null) {
-      render(this.#tripPointComponent, this.#container);
+    if (prevTripPointComponent === null || prevEditFormComponent === null) {
+      render(this.#tripPointComponent, this.#tripPointList);
       return;
     }
-
-    if (this.#mode === Mode.DEFAULT) {
-      replace(this.#tripPointComponent, prevTripPointComponent);
+    switch (this.#mode) {
+      case Mode.DEFAULT:
+        replace(this.#tripPointComponent, prevTripPointComponent);
+        break;
+      case Mode.EDITING:
+        replace(this.#tripPointComponent, prevEditFormComponent);
+        this.#mode = Mode.DEFAULT;
     }
-
-    if (this.#mode === Mode.EDITING) {
-      replace(this.#tripPointFormComponent, prevTripPointFormComponent);
-    }
-
+    remove(prevEditFormComponent);
     remove(prevTripPointComponent);
-    remove(prevTripPointFormComponent);
   }
 
   destroy() {
     remove(this.#tripPointComponent);
-    remove(this.#tripPointFormComponent);
+    remove(this.#editFormComponent);
   }
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#editFormComponent.reset(this.#tripPoint);
       this.#replaceFormToPoint();
     }
   }
+
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editFormComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#editFormComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  #replacePointToForm = () => {
+    replace(this.#editFormComponent, this.#tripPointComponent);
+    this.#handleModeChange();
+    this.#mode = Mode.EDITING;
+  };
+
+  #replaceFormToPoint = () => {
+    replace(this.#tripPointComponent, this.#editFormComponent);
+    this.#mode = Mode.DEFAULT;
+    document.body.removeEventListener('keydown', this.#ecsKeyDownHandler);
+  };
+
+  #ecsKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.#editFormComponent.reset(this.#tripPoint);
+      this.#replaceFormToPoint();
+      document.body.removeEventListener('keydown', this.#ecsKeyDownHandler);
+    }
+  };
+
+  #handleEditClick = () => {
+    this.#replacePointToForm();
+    document.body.addEventListener('keydown', this.#ecsKeyDownHandler);
+  };
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#tripPointComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#editFormComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#editFormComponent.shake(resetFormState);
+  }
+
+  #handleFormSubmit = (update) => {
+    const isMinorUpdate = !datesAreEqual(this.#tripPoint.dateFrom, update.dateFrom) || this.#tripPoint.basePrice !== update.basePrice;
+    this.#handleDataChange(
+      USER_ACTION.UPDATE_TRIPPOINT,
+      isMinorUpdate ? UPDATE_TYPE.MINOR : UPDATE_TYPE.PATCH,
+      update,
+    );
+    document.body.removeEventListener('keydown', this.#ecsKeyDownHandler);
+  };
+
+  #handleRollupButtonClick = () => {
+    this.#editFormComponent.reset(this.#tripPoint);
+    this.#replaceFormToPoint();
+  };
+
+  #handleDeleteClick = (tripPoint) => {
+    this.#handleDataChange(
+      USER_ACTION.DELETE_TRIPPOINT,
+      UPDATE_TYPE.MINOR,
+      tripPoint,
+    );
+  };
 }
