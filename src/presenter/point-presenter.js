@@ -35,6 +35,7 @@ export default class PointPresenter {
     this.#mode = Mode.EDITING;
   }
 
+  //
   #replaceFormToPoint() {
     replace(this.#tripPointComponent, this.#tripPointFormComponent);
     document.removeEventListener('keydown', this.#closeEditFormOnEcsKey);
