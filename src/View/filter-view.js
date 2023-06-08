@@ -27,9 +27,9 @@ const createFilterTemplate = (filterItems, currentFilterType) => {
 };
 
 export default class FilterView extends AbstractView{
-  #filters = null;
-  #currentFilter = null;
-  #onFilterTypeChange = null;
+  #filters;
+  #currentFilter;
+  #onFilterTypeChange;
 
   constructor({filters, currentFilterType, onFilterTypeChange}) {
     super();

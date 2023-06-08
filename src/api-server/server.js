@@ -23,7 +23,7 @@ export default class ApiServer extends ApiService {
       .then(ApiService.parseResponse);
   }
 
-  async updateTripPoint(tripPoint) {
+  updateTripPoint = async (tripPoint) => {
     const response = await this._load({
       url: `points/${tripPoint.id}`,
       method: Method.PUT,
@@ -32,9 +32,9 @@ export default class ApiServer extends ApiService {
     });
 
     return await ApiService.parseResponse(response);
-  }
+  };
 
-  async addTripPoint(tripPoint) {
+  addTripPoint = async (tripPoint) => {
     const response = await this._load({
       url: 'points',
       method: Method.POST,
@@ -43,16 +43,14 @@ export default class ApiServer extends ApiService {
     });
 
     return await ApiService.parseResponse(response);
-  }
+  };
 
-  async deleteTripPoint(tripPoint) {
-    return await this._load({
-      url: `points/${tripPoint.id}`,
-      method: Method.DELETE,
-    });
-  }
+  deleteTripPoint = async (tripPoint) => await this._load({
+    url: `points/${tripPoint.id}`,
+    method: Method.DELETE,
+  });
 
-  #adaptToServer(tripPoint) {
+  #adaptToServer = (tripPoint) => {
     const adaptedTripPoint = {...tripPoint,
       'date_from': (tripPoint.dateFrom) ? new Date(tripPoint.dateFrom).toISOString() : new Date().toISOString,
       'date_to': (tripPoint.dateFrom) ? new Date(tripPoint.dateTo).toISOString() : new Date().toISOString,
@@ -65,5 +63,5 @@ export default class ApiServer extends ApiService {
     delete adaptedTripPoint.basePrice;
     delete adaptedTripPoint.offersIDs;
     return adaptedTripPoint;
-  }
+  };
 }

@@ -4,10 +4,10 @@ import {FILTER_TYPE, FILTER_TYPE_DESCRIPTION, UPDATE_TYPE} from '../utils/consts
 import {filter} from '../utils/util';
 
 export default class FilterPresenter {
-  #filterContainer = null;
-  #filterModel = null;
-  #tripPointsModel = null;
-  #filterComponent = null;
+  #filterContainer;
+  #filterModel;
+  #tripPointsModel;
+  #filterComponent;
 
   constructor(filterContainer, filterModel, tripPointsModel) {
     this.#filterContainer = filterContainer;
