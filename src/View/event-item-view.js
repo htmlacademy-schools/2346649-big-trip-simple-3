@@ -39,6 +39,7 @@ const createEvenItemTemplate = (eventPoint) => {
                     <time class="event__end-time" datetime="${toDateTime}">${toTime}</time>
                   </p>
                 </div>
+<!--                -->
                 <p class="event__price">
                   &euro;&nbsp;<span class="event__price-value">${eventPoint.base_price}</span>
                 </p>
