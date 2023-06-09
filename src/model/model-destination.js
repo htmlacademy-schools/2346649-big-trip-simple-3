@@ -4,16 +4,16 @@ export default class ModelDestinations extends Observable {
   #tripPointApiServer;
   #destinations = [];
 
-  constructor(tripPointApiServer) {
+  constructor({tripEventApiService}) {
     super();
-    this.#tripPointApiServer = tripPointApiServer;
+    this.#tripPointApiServer = tripEventApiService;
     this.init();
   }
 
   init = async () => {
     try {
-      this.#destinations = await this.#tripPointApiServer.destinations;
-    } catch(err) {
+      this.#destinations = await this.#tripPointApiServer .destinations;
+    } catch (err) {
       this.#destinations = [];
     }
   };

@@ -7,8 +7,8 @@ const Method = {
   DELETE: 'DELETE'
 };
 
-export default class ApiServer extends ApiService {
-  get tripPoints() {
+export class ApiServer extends ApiService {
+  get tripEvents() {
     return this._load({url: 'points'})
       .then(ApiService.parseResponse);
   }
@@ -23,45 +23,38 @@ export default class ApiServer extends ApiService {
       .then(ApiService.parseResponse);
   }
 
-  updateTripPoint = async (tripPoint) => {
-    const response = await this._load({
-      url: `points/${tripPoint.id}`,
-      method: Method.PUT,
-      body: JSON.stringify(this.#adaptToServer(tripPoint)),
-      headers: new Headers({'Content-Type': 'application/json'}),
-    });
+  updateTripEvent = async (tripPoint) => await ApiService.parseResponse(await this._load({
+    url: `points/${tripPoint.id}`,
+    method: Method.PUT,
+    body: JSON.stringify(this.#adaptToServer(tripPoint)),
+    headers: new Headers({'Content-Type': 'application/json'}),
+  }));
 
-    return await ApiService.parseResponse(response);
-  };
+  addTripEvent = async (tripPoint) => await ApiService.parseResponse(await this._load({
+    url: 'points',
+    method: Method.POST,
+    body: JSON.stringify(this.#adaptToServer(tripPoint)),
+    headers: new Headers({'Content-Type': 'application/json'}),
+  }));
 
-  addTripPoint = async (tripPoint) => {
-    const response = await this._load({
-      url: 'points',
-      method: Method.POST,
-      body: JSON.stringify(this.#adaptToServer(tripPoint)),
-      headers: new Headers({'Content-Type': 'application/json'}),
-    });
-
-    return await ApiService.parseResponse(response);
-  };
-
-  deleteTripPoint = async (tripPoint) => await this._load({
+  deleteTripEvent = async (tripPoint) => await this._load({
     url: `points/${tripPoint.id}`,
     method: Method.DELETE,
   });
 
   #adaptToServer = (tripPoint) => {
-    const adaptedTripPoint = {...tripPoint,
+    const adaptedTripEvent = {
+      ...tripPoint,
       'date_from': (tripPoint.dateFrom) ? new Date(tripPoint.dateFrom).toISOString() : new Date().toISOString,
-      'date_to': (tripPoint.dateFrom) ? new Date(tripPoint.dateTo).toISOString() : new Date().toISOString,
+      'date_to': (tripPoint.dateTo) ? new Date(tripPoint.dateTo).toISOString() : new Date().toISOString,
       'base_price': Number(tripPoint.basePrice),
       'offers': tripPoint.offersIDs
     };
 
-    delete adaptedTripPoint.dateFrom;
-    delete adaptedTripPoint.dateTo;
-    delete adaptedTripPoint.basePrice;
-    delete adaptedTripPoint.offersIDs;
-    return adaptedTripPoint;
+    delete adaptedTripEvent.dateFrom;
+    delete adaptedTripEvent.dateTo;
+    delete adaptedTripEvent.basePrice;
+    delete adaptedTripEvent.offersIDs;
+    return adaptedTripEvent;
   };
 }

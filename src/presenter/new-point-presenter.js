@@ -1,95 +1,96 @@
-import { render, remove, RenderPosition } from '../framework/render';
+
+import {remove, render, RenderPosition} from '../framework/render';
 import EditFormView from '../View/edit-point-view';
-import {USER_ACTION, UPDATE_TYPE} from '../utils/consts';
+import {UPDATE_TYPE, USER_ACTION} from '../utils/consts';
+
 
 export default class NewTripPointPresenter {
-  #handleDataChange;
-  #handleDestroy;
-  #tripPointListContainer;
-  #tripPointEditComponent;
+  #handleChange;
+  #handelDestroy;
+  #tripPointsListContainer;
+  #tripPointsFormComponent;
 
-  constructor({tripPointListContainer, onDataChange, onDestroy}) {
-    this.#tripPointListContainer = tripPointListContainer;
-    this.#handleDataChange = onDataChange;
-    this.#handleDestroy = onDestroy;
+
+  constructor({tripEventsListContainer, onDataChange, onDestroy}) {
+    this.#tripPointsListContainer = tripEventsListContainer;
+    this.#handleChange = onDataChange;
+    this.#handelDestroy = onDestroy;
   }
 
-  init = (destinations, offers) => {
-    if (this.#tripPointEditComponent !== undefined) {
+  init = ({destinations, offers}) => {
+    if (this.#tripPointsFormComponent !== undefined) {
       return;
     }
 
-    this.#tripPointEditComponent = new EditFormView({
-      destinations: destinations,
-      offers: offers,
-      onFormSubmit: this.#handleFormSubmit,
-      onDeleteClick: this.#handleDeleteClick,
+    this.#tripPointsFormComponent = new EditFormView({
+      destinations,
+      offers,
+      onFormSubmit: this.#onSubmit,
+      onDeleteClick: this.#onDeleteClick,
+      onRollUpButton: this.#onDeleteClick,
       isEditForm: false
     });
 
-    render(this.#tripPointEditComponent, this.#tripPointListContainer,
+    render(this.#tripPointsFormComponent, this.#tripPointsListContainer,
       RenderPosition.AFTERBEGIN);
 
-    document.body.addEventListener('keydown', this.#ecsKeyDownHandler);
+    document.body.addEventListener('keydown', this.#ecsKeyHandler);
   };
 
-  destroy = () => {
-    if (this.#tripPointEditComponent === undefined) {
+  destroy() {
+    if (this.#tripPointsFormComponent === null) {
       return;
     }
 
-    this.#handleDestroy();
+    this.#handelDestroy();
 
-    remove(this.#tripPointEditComponent);
-    this.#tripPointEditComponent = undefined;
+    remove(this.#tripPointsFormComponent);
+    this.#tripPointsFormComponent = null;
 
-    document.body.removeEventListener('keydown', this.#ecsKeyDownHandler);
+    document.body.removeEventListener('keydown', this.#ecsKeyHandler);
+  }
+
+  #onSubmit = (tripEvent) => {
+    this.#handleChange(
+      USER_ACTION.ADD_TRIPPOINT,
+      UPDATE_TYPE.MINOR,
+      this.#deleteId(tripEvent)
+    );
+    this.destroy();
   };
 
-
-  #ecsKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape') {
-      evt.preventDefault();
-      this.destroy();
-    }
+  #onDeleteClick = () => {
+    this.destroy();
   };
 
-  setSaving = () => {
-    this.#tripPointEditComponent.updateElement({
+  setSaving() {
+    this.#tripPointsFormComponent.updateElement({
       isDisabled: true,
       isSaving: true,
     });
-  };
+  }
 
-  setAborting = () => {
+  setAborting() {
     const resetFormState = () => {
-      this.#tripPointEditComponent.updateElement({
+      this.#tripPointsFormComponent.updateElement({
         isDisabled: false,
         isSaving: false,
         isDeleting: false,
       });
     };
 
-    this.#tripPointEditComponent.shake(resetFormState);
+    this.#tripPointsFormComponent.shake(resetFormState);
+  }
+
+  #ecsKeyHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.destroy();
+    }
   };
 
-  #handleFormSubmit = (tripPoint) => {
-    this.#handleDataChange(
-      USER_ACTION.ADD_TRIPPOINT,
-      UPDATE_TYPE.MINOR,
-
-      this.#deleteId(tripPoint)
-    );
-
+  #deleteId = (tripEvent) => {
+    delete tripEvent.id;
+    return tripEvent;
   };
-
-  #handleDeleteClick = () => {
-    this.destroy();
-  };
-
-  #deleteId = (tripPoint) => {
-    delete tripPoint.id;
-    return tripPoint;
-  };
-
 }
