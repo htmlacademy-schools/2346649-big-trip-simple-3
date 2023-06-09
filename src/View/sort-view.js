@@ -9,7 +9,7 @@ const createSortItemTemplate = (sortType, current) => (
         class="trip-sort__input visually-hidden"
         type="radio" name="trip-sort"
         value="sort-${convertToLowerCase(sortType)}"
-        ${(['event', 'offers' ].includes(convertToLowerCase(sortType)) ? 'disabled' : '')}
+        ${(['event', 'offers' ].includes(sortType) ? 'disabled' : '')}
         ${sortType !== 'event' && sortType !== 'offers' && sortType === current ? 'checked' : ''}
       >
       <label class="trip-sort__btn" for="sort-${convertToLowerCase(sortType)}" data-sort-type="${sortType}">${sortType}</label>
@@ -47,7 +47,7 @@ export default class SortView extends AbstractView {
   };
 
   #sortTypeChangeHandler = (evt) => {
-    if (evt.target.tagName !== 'LABEL') {
+    if (evt.target.tagName !== 'LABEL' || ['event', 'offers' ].includes(evt.target.dataset.sortType)) {
       return;
     }
 
